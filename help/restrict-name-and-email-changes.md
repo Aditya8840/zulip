@@ -19,7 +19,7 @@ another method.
 
 {settings_tab|organization-permissions}
 
-1. Under **User identity**, configure **Who can change their name**.
+1. Under **User identity**,configure **Who can change their name**.
 
 {!save-changes.md!}
 

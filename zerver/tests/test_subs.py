@@ -1639,6 +1639,13 @@ class StreamAdminTest(ZulipTestCase):
         )
         self.assertTrue(subscription_exists)
 
+        # Assert that a notification message was sent for the archive.
+        message = self.get_last_message()
+        expected_content = f"Channel {stream.name} has been archived."
+        self.assertEqual(message.content, expected_content)
+        # Assert that the message is read.
+        for um in UserMessage.objects.filter(message=message):
+            self.assertTrue(um.flags & UserMessage.flags.read)
         do_change_user_role(user_profile, UserProfile.ROLE_MEMBER, acting_user=None)
         user_profile_group = check_add_user_group(
             user_profile.realm, "user_profile_group", [user_profile], acting_user=user_profile
@@ -1659,6 +1666,14 @@ class StreamAdminTest(ZulipTestCase):
             .exists()
         )
         self.assertTrue(subscription_exists)
+
+        # Assert that a notification message was sent for the archive.
+        message = self.get_last_message()
+        expected_content = f"Channel {stream.name} has been archived."
+        self.assertEqual(message.content, expected_content)
+        # Assert that the message is read.
+        for um in UserMessage.objects.filter(message=message):
+            self.assertTrue(um.flags & UserMessage.flags.read)
 
     def test_deactivate_stream_removes_default_stream(self) -> None:
         stream = self.make_stream("new_stream")

@@ -8,10 +8,13 @@ import render_left_sidebar_inbox_popover from "../templates/popovers/left_sideba
 import render_left_sidebar_recent_view_popover from "../templates/popovers/left_sidebar/left_sidebar_recent_view_popover.hbs";
 import render_left_sidebar_starred_messages_popover from "../templates/popovers/left_sidebar/left_sidebar_starred_messages_popover.hbs";
 import render_left_sidebar_views_popover from "../templates/popovers/left_sidebar/left_sidebar_views_popover.hbs";
+import render_left_sidebar_hide_popover from "../templates/popovers/left_sidebar/left_sidebar_hide_popover.hbs";
 
 import * as channel from "./channel.ts";
 import * as drafts from "./drafts.ts";
 import * as left_sidebar_navigation_area from "./left_sidebar_navigation_area.ts";
+import {built_in_views_meta_data} from "./navigation_views.ts";
+import * as navigation_views from "./navigation_views.ts";
 import * as popover_menus from "./popover_menus.ts";
 import * as popovers from "./popovers.ts";
 import * as settings_config from "./settings_config.ts";
@@ -32,6 +35,21 @@ function common_click_handlers(): void {
             url: "/json/settings",
             data,
         });
+
+        popovers.hide_all();
+    });
+
+    $("body").on("click", ".hide-navigation-view, .show-navigation-view", (e) => {
+        e.preventDefault();
+
+        const fragment = $(e.currentTarget).attr("data-fragment");
+        console.log("Fragment:", fragment);
+        if (!fragment) {
+            return;
+        }
+
+        const want_to_pin = $(e.currentTarget).hasClass("show-navigation-view");
+        navigation_views.set_view_pinned_status(fragment, want_to_pin);
 
         popovers.hide_all();
     });
@@ -105,6 +123,8 @@ export function initialize(): void {
                     render_left_sidebar_starred_messages_popover({
                         show_unstar_all_button,
                         starred_message_counts: user_settings.starred_message_counts,
+                        fragment: built_in_views_meta_data.starred_messages!.fragment,
+                        is_currently_active_unpinned_view: !navigation_views.get_navigation_view_by_fragment(built_in_views_meta_data.starred_messages!.fragment)?.is_pinned,
                     }),
                 ),
             );
@@ -134,7 +154,10 @@ export function initialize(): void {
         onShow(instance) {
             popovers.hide_all();
 
-            instance.setContent(ui_util.parse_html(render_left_sidebar_drafts_popover({})));
+            instance.setContent(ui_util.parse_html(render_left_sidebar_drafts_popover({
+                fragment: built_in_views_meta_data.drafts!.fragment,
+                is_currently_active_unpinned_view: !navigation_views.get_navigation_view_by_fragment(built_in_views_meta_data.drafts!.fragment)?.is_pinned,
+            })));
         },
         onHidden(instance) {
             instance.destroy();
@@ -179,6 +202,8 @@ export function initialize(): void {
                         view_code,
                         show_unread_count: user_settings.web_left_sidebar_unreads_count_summary,
                         unread_messages_present,
+                        fragment: built_in_views_meta_data.inbox!.fragment,
+                        is_currently_active_unpinned_view: !navigation_views.get_navigation_view_by_fragment(built_in_views_meta_data.inbox!.fragment)?.is_pinned,
                     }),
                 ),
             );
@@ -226,6 +251,8 @@ export function initialize(): void {
                         view_code,
                         show_unread_count: user_settings.web_left_sidebar_unreads_count_summary,
                         unread_messages_present,
+                        fragment: built_in_views_meta_data.all_messages!.fragment,
+                        is_currently_active_unpinned_view: !navigation_views.get_navigation_view_by_fragment(built_in_views_meta_data.all_messages!.fragment)?.is_pinned,
                     }),
                 ),
             );
@@ -272,6 +299,8 @@ export function initialize(): void {
                         view_code,
                         show_unread_count: user_settings.web_left_sidebar_unreads_count_summary,
                         unread_messages_present,
+                        fragment: built_in_views_meta_data.recent_view!.fragment,
+                        is_currently_active_unpinned_view: !navigation_views.get_navigation_view_by_fragment(built_in_views_meta_data.recent_view!.fragment)?.is_pinned,
                     }),
                 ),
             );
@@ -283,17 +312,186 @@ export function initialize(): void {
         },
     });
 
+    popover_menus.register_popover_menu(".mentions-sidebar-menu-icon", {
+        ...popover_menus.left_sidebar_tippy_options,
+        onShow(instance) {
+            popover_menus.popover_instances.left_sidebar_mentions_popover = instance;
+            assert(instance.reference instanceof HTMLElement);
+            ui_util.show_left_sidebar_menu_icon(instance.reference);
+            popovers.hide_all();
+
+            instance.setContent(
+                ui_util.parse_html(
+                    render_left_sidebar_hide_popover({
+                        fragment: built_in_views_meta_data.mentions!.fragment,
+                        view_name: built_in_views_meta_data.mentions!.name,
+                        is_currently_active_unpinned_view:
+                            !navigation_views.get_navigation_view_by_fragment(
+                                built_in_views_meta_data.mentions!.fragment,
+                            )?.is_pinned,
+                    }),
+                ),
+            );
+        },
+        onHidden(instance) {
+            instance.destroy();
+            popover_menus.popover_instances.left_sidebar_mentions_popover = null;
+            ui_util.hide_left_sidebar_menu_icon();
+        },
+    });
+
+    popover_menus.register_popover_menu(".reactions-sidebar-menu-icon", {
+        ...popover_menus.left_sidebar_tippy_options,
+        onShow(instance) {
+            popover_menus.popover_instances.left_sidebar_reactions_popover = instance;
+            assert(instance.reference instanceof HTMLElement);
+            ui_util.show_left_sidebar_menu_icon(instance.reference);
+            popovers.hide_all();
+
+            instance.setContent(
+                ui_util.parse_html(
+                    render_left_sidebar_hide_popover({
+                        fragment: built_in_views_meta_data.my_reactions!.fragment,
+                        view_name: built_in_views_meta_data.my_reactions!.name,
+                        is_currently_active_unpinned_view:
+                            !navigation_views.get_navigation_view_by_fragment(
+                                built_in_views_meta_data.my_reactions!.fragment,
+                            )?.is_pinned,
+                    }),
+                ),
+            );
+        },
+        onHidden(instance) {
+            instance.destroy();
+            popover_menus.popover_instances.left_sidebar_reactions_popover = null;
+            ui_util.hide_left_sidebar_menu_icon();
+        },
+    });
+
+    popover_menus.register_popover_menu(".drafts-sidebar-menu-icon", {
+        ...popover_menus.left_sidebar_tippy_options,
+        onShow(instance) {
+            popover_menus.popover_instances.left_sidebar_drafts_popover = instance;
+            assert(instance.reference instanceof HTMLElement);
+            ui_util.show_left_sidebar_menu_icon(instance.reference);
+            popovers.hide_all();
+
+            instance.setContent(
+                ui_util.parse_html(
+                    render_left_sidebar_hide_popover({
+                        fragment: built_in_views_meta_data.drafts!.fragment,
+                        view_name: built_in_views_meta_data.drafts!.name,
+                        is_currently_active_unpinned_view:
+                            !navigation_views.get_navigation_view_by_fragment(
+                                built_in_views_meta_data.drafts!.fragment,
+                            )?.is_pinned,
+                    }),
+                ),
+            );
+        },
+        onHidden(instance) {
+            instance.destroy();
+            popover_menus.popover_instances.left_sidebar_drafts_popover = null;
+            ui_util.hide_left_sidebar_menu_icon();
+        },
+    });
+    popover_menus.register_popover_menu(".reactions-sidebar-menu-icon", {
+        ...popover_menus.left_sidebar_tippy_options,
+        onShow(instance) {
+            popover_menus.popover_instances.left_sidebar_scheduled_messages_popover = instance;
+            assert(instance.reference instanceof HTMLElement);
+            ui_util.show_left_sidebar_menu_icon(instance.reference);
+            popovers.hide_all();
+
+            instance.setContent(
+                ui_util.parse_html(
+                    render_left_sidebar_hide_popover({
+                        fragment: built_in_views_meta_data.my_reactions!.fragment,
+                        view_name: built_in_views_meta_data.my_reactions!.name,
+                        is_currently_active_unpinned_view:
+                            !navigation_views.get_navigation_view_by_fragment(
+                                built_in_views_meta_data.my_reactions!.fragment,
+                            )?.is_pinned,
+                    }),
+                ),
+            );
+        },
+        onHidden(instance) {
+            instance.destroy();
+            popover_menus.popover_instances.left_sidebar_scheduled_messages_popover = null;
+            ui_util.hide_left_sidebar_menu_icon();
+        },
+    });
+
+    popover_menus.register_popover_menu(".scheduled_messages-sidebar-menu-icon", {
+        ...popover_menus.left_sidebar_tippy_options,
+        onShow(instance) {
+            assert(instance.reference instanceof HTMLElement);
+            ui_util.show_left_sidebar_menu_icon(instance.reference);
+            popovers.hide_all();
+
+            instance.setContent(
+                ui_util.parse_html(
+                    render_left_sidebar_hide_popover({
+                        fragment: built_in_views_meta_data.scheduled_messages!.fragment,
+                        view_name: built_in_views_meta_data.scheduled_messages!.name,
+                        is_currently_active_unpinned_view:
+                            !navigation_views.get_navigation_view_by_fragment(
+                                built_in_views_meta_data.scheduled_messages!.fragment,
+                            )?.is_pinned,
+                    }),
+                ),
+            );
+        },
+        onHidden(instance) {
+            instance.destroy();
+            ui_util.hide_left_sidebar_menu_icon();
+        },
+    });
+
+    popover_menus.register_popover_menu(".reminders-sidebar-menu-icon", {
+        ...popover_menus.left_sidebar_tippy_options,
+        onShow(instance) {
+            popover_menus.popover_instances.left_sidebar_reminders_popover = instance;
+            assert(instance.reference instanceof HTMLElement);
+            ui_util.show_left_sidebar_menu_icon(instance.reference);
+            popovers.hide_all();
+
+            instance.setContent(
+                ui_util.parse_html(
+                    render_left_sidebar_hide_popover({
+                        fragment: built_in_views_meta_data.reminders!.fragment,
+                        view_name: built_in_views_meta_data.reminders!.name,
+                        is_currently_active_unpinned_view:
+                            !navigation_views.get_navigation_view_by_fragment(
+                                built_in_views_meta_data.reminders!.fragment,
+                            )?.is_pinned,
+                    }),
+                ),
+            );
+        },
+        onHidden(instance) {
+            instance.destroy();
+            popover_menus.popover_instances.left_sidebar_reminders_popover = null;
+            ui_util.hide_left_sidebar_menu_icon();
+        },
+    });
+
     popover_menus.register_popover_menu(".left-sidebar-navigation-menu-icon", {
         ...popover_menus.left_sidebar_tippy_options,
         onShow(instance) {
+            const is_condensed = left_sidebar_navigation_area.is_condensed();
             const built_in_popover_condensed_views =
                 left_sidebar_navigation_area.get_built_in_popover_condensed_views();
+            const unpinned_built_in_views = left_sidebar_navigation_area.get_built_in_views().filter((view) => !view.is_pinned && view.fragment !== left_sidebar_navigation_area.current_active_fragment);
+
+            let views = is_condensed ? built_in_popover_condensed_views : unpinned_built_in_views;
 
             popovers.hide_all();
             instance.setContent(
                 ui_util.parse_html(
                     render_left_sidebar_views_popover({
-                        views: built_in_popover_condensed_views,
+                        views,
                     }),
                 ),
             );

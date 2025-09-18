@@ -1,17 +1,12 @@
 <div class="popover-menu" data-simplebar data-simplebar-tab-index="-1">
     <ul role="menu" class="popover-menu-list">
         <li role="none" class="link-item popover-menu-list-item">
-            <a role="menuitem" id="delete_all_drafts_sidebar" class="popover-menu-link" tabindex="0">
-                <i class="popover-menu-icon zulip-icon zulip-icon-trash" aria-hidden="true"></i>
-                <span class="popover-menu-label">{{t "Delete all drafts" }}</span>
-            </a>
-        </li>
-        <li role="none" class="link-item popover-menu-list-item">
             {{#if is_currently_active_unpinned_view}}
             <a role="menuitem" class="show-navigation-view popover-menu-link" data-fragment="{{fragment}}" tabindex="0">
                 <i class="popover-menu-icon zulip-icon zulip-icon-eye" aria-hidden="true"></i>
-                <span class="popover-menu-label">{{#tr}}
-                        Hide <z-highlight>drafts</z-highlight> from left sidebar
+                <span class="popover-menu-label">
+                    {{#tr}}
+                        Show <z-highlight>{{view_name}}</z-highlight> in left sidebar
                         {{#*inline "z-highlight"}}<b class="highlighted-element">{{> @partial-block}}</b>{{/inline}}
                     {{/tr}}
                 </span>
@@ -19,8 +14,9 @@
             {{else}}
             <a role="menuitem" class="hide-navigation-view popover-menu-link" data-fragment="{{fragment}}" tabindex="0">
                 <i class="popover-menu-icon zulip-icon zulip-icon-hide" aria-hidden="true"></i>
-                <span class="popover-menu-label">{{#tr}}
-                        Hide <z-highlight>drafts</z-highlight> from left sidebar
+                <span class="popover-menu-label">
+                    {{#tr}}
+                        Hide <z-highlight>{{view_name}}</z-highlight> in left sidebar
                         {{#*inline "z-highlight"}}<b class="highlighted-element">{{> @partial-block}}</b>{{/inline}}
                     {{/tr}}
                 </span>

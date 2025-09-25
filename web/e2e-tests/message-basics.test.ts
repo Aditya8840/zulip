@@ -343,15 +343,124 @@ async function test_stream_search_filters_stream_list(page: Page): Promise<void>
     for (let i = 0; i < 12; i += 1) {
         await arrow(page, "Down");
     }
+
+    let highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);    
+
     await arrow(page, "Down"); // core team -> Denmark
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);    
+
     await arrow(page, "Down"); // Denmark -> sandbox
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);
+
     await arrow(page, "Up"); // sandbox -> Denmark
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);
+
     await arrow(page, "Up"); // Denmark -> core team
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);
+
     await arrow(page, "Up"); // core team -> core team
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);
+
     await arrow(page, "Down"); // core team -> Denmark
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);
+
     await arrow(page, "Down"); // Denmark -> sandbox
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);
+
     await arrow(page, "Down"); // sandbox-> Venice
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);
+
     await arrow(page, "Down"); // Venice -> Verona
+
+    highlightedElements = await page.$$eval(".highlighted_row", els =>
+        els.map(el => ({
+            tag: el.tagName,
+            id: el.id,
+            classes: el.className,
+            text: el.textContent?.trim(),
+        }))
+    );
+    console.log("Highlighted elements:", highlightedElements);
 
     await page.waitForSelector((await get_stream_li(page, "Verona")) + " .highlighted_row", {
         visible: true,

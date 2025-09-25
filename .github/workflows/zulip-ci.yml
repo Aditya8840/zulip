@@ -127,6 +127,12 @@ jobs:
           ./tools/test-help-documentation --skip-external-links --help-center
           ./tools/test-api
 
+      - name: Run puppeteer tests
+        if: ${{ matrix.include_frontend_tests }}
+        run: |
+          source tools/ci/activate-venv
+          ./tools/test-js-with-puppeteer
+
       - name: Run node tests
         if: ${{ matrix.include_frontend_tests }}
         run: |
@@ -159,12 +165,6 @@ jobs:
         if: ${{ matrix.include_frontend_tests }}
         run: |
           pnpm run --filter=starlight_help check
-
-      - name: Run puppeteer tests
-        if: ${{ matrix.include_frontend_tests }}
-        run: |
-          source tools/ci/activate-venv
-          ./tools/test-js-with-puppeteer
 
       - name: Check pnpm dedupe
         if: ${{ matrix.include_frontend_tests }}
